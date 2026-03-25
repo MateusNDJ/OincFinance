@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oinc Finance</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐷</text></svg>">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="container">
+        <div class="login-box">
+            <div class="text-center mb-4">
+                <div class="logo-icon">
+                    <i class="bi bi-piggy-bank-fill"></i>
+                </div>
+                <h1 class="mb-2">Oinc Finance</h1>
+                <p class="text-muted">Planejamento financeiro</p>
+            </div>
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" class="form-control" id="email" placeholder="seu@email.com" autocomplete="email" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Senha</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control" id="password" placeholder="••••••••" autocomplete="current-password" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Entrar
+                </button>
+            </form>
+            <div id="loginError" class="alert alert-danger mt-3 d-none"></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="d-none">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container-fluid">
+                <a class="navbar-brand d-flex align-items-center" href="#">
+                    <i class="bi bi-piggy-bank-fill me-2" style="font-size: 24px; color: var(--primary-color);"></i>
+                    <span>Oinc Finance</span>
+                </a>
+                <div class="d-flex align-items-center gap-3">
+                    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+                        <i class="bi bi-moon-fill"></i>
+                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-2" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="" alt="Avatar" class="user-avatar" id="userAvatar">
+                            <span class="user-name" id="userName"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li>
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileModal">
+                                    <i class="bi bi-person-circle me-2"></i>Meu Perfil
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="#" id="logoutBtn">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Sair
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mt-4">
+            <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="combined-tab" data-bs-toggle="tab" data-bs-target="#combined" type="button">
+                        <i class="bi bi-house-heart me-2"></i>Economia Conjunta
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="individual-tab" data-bs-toggle="tab" data-bs-target="#individual" type="button">
+                        <i class="bi bi-person-circle me-2"></i>Minha Economia
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="submetas-tab" data-bs-toggle="tab" data-bs-target="#submetas" type="button">
+                        <i class="bi bi-trophy me-2"></i>Metas & Recompensas
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="mainTabContent">
+                <!-- Combined Tab -->
+                <div class="tab-pane fade show active" id="combined" role="tabpanel">
+                    <!-- Motivational Message -->
+                    <div class="motivational-card" id="motivationalMessage">
+                        <h5>✨ Juntos somos mais fortes! ✨</h5>
+                        <p class="mb-0">Cada centavinho nos aproxima do nosso sonho! 🏠💕</p>
+                    </div>
+                    
+                    <!-- Level System -->
+                    <div class="card mb-4 level-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h5 class="mb-1">
+                                        <i class="bi bi-star-fill me-2"></i>Nível <span id="userLevel">1</span>
+                                    </h5>
+                                    <small class="text-muted" id="levelTitle">Iniciante</small>
+                                </div>
+                                <div class="level-badge" id="levelBadge">🥉</div>
+                            </div>
+                            <div class="progress mb-2" style="height: 25px;">
+                                <div class="progress-bar bg-warning" id="levelProgress" role="progressbar" style="width: 0%">
+                                    <span id="levelProgressText">0%</span>
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                <span id="currentContributions">0</span> / <span id="nextLevelContributions">5</span> contribuições para o próximo nível
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Goal Section -->
+                    <div class="card mb-4 goal-card">
+                        <div class="card-body">
+                            <h3 class="card-title text-center">
+                                <i class="bi bi-flag-fill me-2"></i>Meta Principal
+                            </h3>
+                            <div id="goalDisplay"></div>
+                            <div id="goalImageContainer"></div>
+                            <button class="btn btn-light btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#goalModal">
+                                <i class="bi bi-pencil-square me-1"></i>Editar Meta
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Stats -->
+                    <div class="dashboard-grid">
+                        <div class="stat-card stat-card-success">
+                            <div class="stat-icon"><i class="bi bi-wallet2"></i></div>
+                            <h6>Acumulado</h6>
+                            <div class="stat-value" id="totalSaved">R$ 0,00</div>
+                        </div>
+                        <div class="stat-card stat-card-warning">
+                            <div class="stat-icon"><i class="bi bi-bullseye"></i></div>
+                            <h6>Falta</h6>
+                            <div class="stat-value" id="remaining">R$ 0,00</div>
+                        </div>
+                        <div class="stat-card stat-card-info">
+                            <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
+                            <h6>Previsão</h6>
+                            <div class="stat-value" id="forecast" style="font-size: 18px;">-</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Metrics -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5><i class="bi bi-graph-up me-2"></i>Métricas Avançadas</h5>
+                            <div class="row mt-3">
+                                <div class="col-md-4 mb-3">
+                                    <div class="metric-item">
+                                        <i class="bi bi-cash-stack text-success"></i>
+                                        <div>
+                                            <small class="text-muted">Média por Contribuição</small>
+                                            <div class="fw-bold" id="avgContribution">R$ 0,00</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="metric-item">
+                                        <i class="bi bi-calendar3 text-primary"></i>
+                                        <div>
+                                            <small class="text-muted">Frequência</small>
+                                            <div class="fw-bold" id="frequency">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="metric-item">
+                                        <i class="bi bi-speedometer2 text-warning"></i>
+                                        <div>
+                                            <small class="text-muted">Velocidade</small>
+                                            <div class="fw-bold" id="savingSpeed">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Section -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="text-center mb-3">
+                                <i class="bi bi-graph-up-arrow me-2"></i>Progresso
+                            </h5>
+                            <div class="piggy-bank-container text-center">
+                                <div class="piggy-bank" id="piggyBank">🐷</div>
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="progress mb-3" style="height: 35px;">
+                                <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contributions Comparison -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5><i class="bi bi-bar-chart-fill me-2"></i>Contribuições por Pessoa</h5>
+                            <canvas id="contributionsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5><i class="bi bi-clock-history me-2"></i>Histórico de Contribuições</h5>
+                                <button class="btn btn-outline-danger btn-sm" id="clearHistoryBtn">
+                                    <i class="bi bi-trash me-1"></i>Limpar Tudo
+                                </button>
+                            </div>
+                            <div id="combinedHistory"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Individual Tab -->
+                <div class="tab-pane fade" id="individual" role="tabpanel">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4><i class="bi bi-cash-stack me-2"></i>Meu Saldo</h4>
+                            <p class="fs-3 text-primary fw-bold" id="myBalance">R$ 0,00</p>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#contributionModal">
+                                <i class="bi bi-plus-circle me-2"></i>Adicionar Contribuição
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="bi bi-list-check me-2"></i>Minhas Contribuições</h5>
+                            <div id="myHistory"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submetas Tab -->
+                <div class="tab-pane fade" id="submetas" role="tabpanel">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4><i class="bi bi-list-task me-2"></i>Submetas</h4>
+                            <p class="text-muted">Divida sua meta principal em etapas menores!</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#submetaModal">
+                                <i class="bi bi-plus-circle me-2"></i>Adicionar Submeta
+                            </button>
+                            <div id="submetasList" class="mt-3"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <h4><i class="bi bi-award me-2"></i>Recompensas Conquistadas</h4>
+                            <p class="text-muted">Cada meta atingida merece uma comemoração!</p>
+                            <div id="rewardsList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal fade" id="profileModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-person-circle me-2"></i>Meu Perfil
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="profileForm">
+                        <div class="text-center mb-4">
+                            <div class="profile-avatar-container">
+                                <img src="" alt="Avatar" class="profile-avatar" id="profileAvatarPreview">
+                                <label for="profileAvatarInput" class="avatar-upload-btn">
+                                    <i class="bi bi-camera-fill"></i>
+                                </label>
+                                <input type="file" id="profileAvatarInput" accept="image/*" class="d-none">
+                            </div>
+                        </div>
+                        
+                        <!-- Tabs -->
+                        <ul class="nav nav-pills mb-3" id="profileTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="profile-info-tab" data-bs-toggle="pill" data-bs-target="#profile-info" type="button">
+                                    <i class="bi bi-person me-1"></i>Perfil
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="profile-theme-tab" data-bs-toggle="pill" data-bs-target="#profile-theme" type="button">
+                                    <i class="bi bi-palette me-1"></i>Ambiente
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content" id="profileTabContent">
+                            <!-- Profile Info Tab -->
+                            <div class="tab-pane fade show active" id="profile-info" role="tabpanel">
+                                <div class="mb-3">
+                                    <label class="form-label">Nome de Usuário</label>
+                                    <input type="text" class="form-control" id="profileUsername" placeholder="Digite seu nome" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="profileEmail" disabled>
+                                    <small class="text-muted">O email não pode ser alterado</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Theme Tab -->
+                            <div class="tab-pane fade" id="profile-theme" role="tabpanel">
+                                <div class="mb-3">
+                                    <label class="form-label">Imagem de Fundo</label>
+                                    <input type="file" class="form-control" id="backgroundImageInput" accept="image/*">
+                                    <small class="text-muted">Personalize o fundo da aplicação</small>
+                                    <div id="backgroundPreview" class="mt-2"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Ou use uma URL</label>
+                                    <input type="url" class="form-control" id="backgroundImageUrl" placeholder="https://exemplo.com/imagem.jpg">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Opacidade do Fundo</label>
+                                    <input type="range" class="form-range" id="backgroundOpacity" min="0" max="100" value="20">
+                                    <small class="text-muted">Atual: <span id="opacityValue">20</span>%</small>
+                                </div>
+                                <button type="button" class="btn btn-outline-danger btn-sm" id="removeBackgroundBtn">
+                                    <i class="bi bi-trash me-1"></i>Remover Fundo
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 mt-3">
+                            <i class="bi bi-check-circle me-2"></i>Salvar Alterações
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goal Modal -->
+    <div class="modal fade" id="goalModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-flag-fill me-2"></i>Definir Meta Principal
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="goalForm">
+                        <div class="mb-3">
+                            <label class="form-label">Nome da Meta</label>
+                            <input type="text" class="form-control" id="goalName" placeholder="Ex: Nossa Casinha" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Valor da Meta (R$)</label>
+                            <input type="number" class="form-control" id="goalAmount" step="0.01" placeholder="Ex: 500000" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Imagem da Meta (opcional)</label>
+                            <input type="file" class="form-control" id="goalImageFile" accept="image/*">
+                            <small class="text-muted">Ou cole o link de uma imagem</small>
+                            <input type="url" class="form-control mt-2" id="goalImage" placeholder="https://exemplo.com/imagem.jpg">
+                            <div id="goalImagePreview" class="mt-2"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2"></i>Salvar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contribution Modal -->
+    <div class="modal fade" id="contributionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-cash-coin me-2"></i>Adicionar Contribuição
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="contributionForm">
+                        <div class="mb-3">
+                            <label class="form-label">Valor (R$)</label>
+                            <input type="number" class="form-control" id="contributionAmount" step="0.01" placeholder="Ex: 100.00" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Data</label>
+                            <input type="date" class="form-control" id="contributionDate" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle me-2"></i>Adicionar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submeta Modal -->
+    <div class="modal fade" id="submetaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-list-task me-2"></i>Adicionar Submeta
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="submetaForm">
+                        <div class="mb-3">
+                            <label class="form-label">Nome da Submeta</label>
+                            <input type="text" class="form-control" id="submetaName" placeholder="Ex: Entrada da casa" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Valor (R$)</label>
+                            <input type="number" class="form-control" id="submetaAmount" step="0.01" placeholder="Ex: 50000" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Recompensa ao atingir</label>
+                            <input type="text" class="form-control" id="submetaReward" placeholder="Ex: Jantar especial 🍝" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Imagem da Conquista (opcional)</label>
+                            <input type="file" class="form-control" id="submetaImage" accept="image/*">
+                            <small class="text-muted">Adicione uma imagem que representa essa conquista</small>
+                            <div id="submetaImagePreview" class="mt-2"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2"></i>Adicionar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
