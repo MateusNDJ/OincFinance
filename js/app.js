@@ -72,8 +72,25 @@ async function handleLogin(e) {
     
     try {
         await signInWithEmailAndPassword(auth, email, password);
+        // Login successful - onAuthStateChanged will handle the redirect
     } catch (error) {
-        showErrorModal('Email ou senha incorretos. Por favor, tente novamente.');
+        console.error('Login error:', error.code, error.message);
+        
+        let errorMessage = 'Email ou senha incorretos. Por favor, tente novamente.';
+        
+        if (error.code === 'auth/user-not-found') {
+            errorMessage = 'Usuário não encontrado. Verifique o email.';
+        } else if (error.code === 'auth/wrong-password') {
+            errorMessage = 'Senha incorreta. Tente novamente.';
+        } else if (error.code === 'auth/invalid-email') {
+            errorMessage = 'Email inválido. Verifique o formato.';
+        } else if (error.code === 'auth/too-many-requests') {
+            errorMessage = 'Muitas tentativas. Aguarde alguns minutos.';
+        } else if (error.code === 'auth/network-request-failed') {
+            errorMessage = 'Erro de conexão. Verifique sua internet.';
+        }
+        
+        showErrorModal(errorMessage);
     }
 }
 
