@@ -3,7 +3,7 @@ import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https:/
 import { ref, set, get, push, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
 let currentUser = null;
-let goalData = null;
+let goalsData = {}; // Changed from goalData to goalsData (multiple goals)
 let contributionsData = {};
 let submetasData = {};
 let rewardsData = [];
@@ -113,14 +113,15 @@ function showMainApp() {
 
 // Data Loading
 function loadData() {
-    const goalRef = ref(db, 'goal');
+    const goalsRef = ref(db, 'goals'); // Changed from 'goal' to 'goals'
     const contributionsRef = ref(db, 'contributions');
     const submetasRef = ref(db, 'submetas');
     const rewardsRef = ref(db, 'rewards');
     
-    onValue(goalRef, (snapshot) => {
-        goalData = snapshot.val();
-        updateGoalDisplay();
+    onValue(goalsRef, (snapshot) => {
+        goalsData = snapshot.val() || {};
+        updateGoalsDisplay();
+        updateAllDisplays();
     });
     
     onValue(contributionsRef, (snapshot) => {
@@ -154,35 +155,66 @@ async function handleGoalSubmit(e) {
         image = await fileToBase64(imageFile);
     }
     
-    await set(ref(db, 'goal'), { name, amount, image });
+    const goal = {
+        name,
+        amount,
+        image,
+        createdAt: Date.now()
+    };
+    
+    await push(ref(db, 'goals'), goal); // Changed to push for multiple goals
     
     bootstrap.Modal.getInstance(document.getElementById('goalModal')).hide();
     e.target.reset();
     document.getElementById('goalImagePreview').innerHTML = '';
-    showSuccessModal('Meta definida com sucesso! 🎉');
+    showSuccessModal('Meta adicionada com sucesso! 🎉');
 }
 
-function updateGoalDisplay() {
-    const display = document.getElementById('goalDisplay');
-    const imageContainer = document.getElementById('goalImageContainer');
+function updateGoalsDisplay() {
+    const container = document.getElementById('goalsList');
+    const goals = Object.entries(goalsData).map(([id, data]) => ({ id, ...data }));
     
-    if (goalData) {
-        display.innerHTML = `
-            <h4>${goalData.name}</h4>
-            <p class="fs-5">Meta: ${formatCurrency(goalData.amount)}</p>
-        `;
-        
-        if (goalData.image) {
-            imageContainer.innerHTML = `
-                <img src="${goalData.image}" alt="${goalData.name}" class="goal-image">
-            `;
-        } else {
-            imageContainer.innerHTML = '';
-        }
-    } else {
-        display.innerHTML = '<p>Nenhuma meta definida ainda 🏠</p>';
-        imageContainer.innerHTML = '';
+    if (goals.length === 0) {
+        container.innerHTML = '<p class="text-muted">Nenhuma meta criada ainda. Clique em "Adicionar Meta" para começar! 🎯</p>';
+        return;
     }
+    
+    const contributions = Object.values(contributionsData);
+    const total = contributions.reduce((sum, c) => sum + c.amount, 0);
+    
+    container.innerHTML = goals.map(goal => {
+        const percentage = Math.min(100, (total / goal.amount) * 100);
+        const remaining = Math.max(0, goal.amount - total);
+        const isCompleted = total >= goal.amount;
+        
+        const imageHtml = goal.image ? `
+            <img src="${goal.image}" class="goal-card-image mb-3" alt="${goal.name}">
+        ` : '';
+        
+        return `
+            <div class="goal-item ${isCompleted ? 'completed' : ''}" style="cursor: pointer;" onclick="showGoalDetailsModal('${goal.id}')">
+                ${imageHtml}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="mb-0">${goal.name}</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary">${formatCurrency(goal.amount)}</span>
+                        <button class="btn btn-sm btn-outline-danger delete-goal-btn" data-id="${goal.id}" title="Deletar meta" onclick="event.stopPropagation()">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="progress mb-2" style="height: 25px;">
+                    <div class="progress-bar ${isCompleted ? 'bg-success' : ''}" style="width: ${percentage}%">
+                        ${percentage.toFixed(1)}%
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">Acumulado: ${formatCurrency(total)}</small>
+                    <small class="text-muted">Falta: ${formatCurrency(remaining)}</small>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 // Image Upload Handlers
@@ -255,28 +287,44 @@ function updateAllDisplays() {
 function updateProgressDisplay() {
     const contributions = Object.values(contributionsData);
     const total = contributions.reduce((sum, c) => sum + c.amount, 0);
-    const goalAmount = goalData?.amount || 0;
-    const remaining = Math.max(0, goalAmount - total);
-    const percentage = goalAmount > 0 ? Math.min(100, (total / goalAmount) * 100) : 0;
+    const goals = Object.values(goalsData);
+    const totalGoalAmount = goals.reduce((sum, g) => sum + g.amount, 0);
+    const remaining = Math.max(0, totalGoalAmount - total);
+    const percentage = totalGoalAmount > 0 ? Math.min(100, (total / totalGoalAmount) * 100) : 0;
     
     document.getElementById('totalSaved').textContent = formatCurrency(total);
     document.getElementById('remaining').textContent = formatCurrency(remaining);
+    document.getElementById('totalContributions').textContent = contributions.length;
     document.getElementById('progressBar').style.width = percentage + '%';
     document.getElementById('progressBar').textContent = percentage.toFixed(1) + '%';
     document.getElementById('progressFill').style.height = percentage + '%';
     
+    // Progress message
+    let message = 'Continue economizando!';
+    if (percentage >= 100) {
+        message = '🎉 Parabéns! Todas as metas atingidas!';
+    } else if (percentage >= 75) {
+        message = '🔥 Quase lá! Falta pouco!';
+    } else if (percentage >= 50) {
+        message = '💪 Metade do caminho! Continue assim!';
+    } else if (percentage >= 25) {
+        message = '🌟 Bom progresso! Não desista!';
+    }
+    document.getElementById('progressMessage').textContent = message;
+    
     // Celebration when goal is reached
     const piggyBank = document.getElementById('piggyBank');
-    if (percentage >= 100 && goalAmount > 0) {
+    if (percentage >= 100 && totalGoalAmount > 0) {
         piggyBank.textContent = '🎉';
-        document.querySelector('.goal-card').classList.add('celebration-mode');
+        document.querySelector('.piggy-bank-container').classList.add('celebration-mode');
     } else {
         piggyBank.textContent = '🐷';
-        document.querySelector('.goal-card').classList.remove('celebration-mode');
+        document.querySelector('.piggy-bank-container')?.classList.remove('celebration-mode');
     }
     
-    updateForecast(contributions, total, goalAmount);
+    updateForecast(contributions, total, totalGoalAmount);
     updateMyBalance();
+    updateIndividualDashboard();
 }
 
 function updateForecast(contributions, total, goalAmount) {
@@ -305,6 +353,21 @@ function updateMyBalance() {
     const myContributions = Object.values(contributionsData).filter(c => c.userId === currentUser.uid);
     const myTotal = myContributions.reduce((sum, c) => sum + c.amount, 0);
     document.getElementById('myBalance').textContent = formatCurrency(myTotal);
+}
+
+function updateIndividualDashboard() {
+    const myContributions = Object.values(contributionsData).filter(c => c.userId === currentUser.uid);
+    const allContributions = Object.values(contributionsData);
+    
+    const myTotal = myContributions.reduce((sum, c) => sum + c.amount, 0);
+    const totalAll = allContributions.reduce((sum, c) => sum + c.amount, 0);
+    const myAvg = myContributions.length > 0 ? myTotal / myContributions.length : 0;
+    const participation = totalAll > 0 ? (myTotal / totalAll) * 100 : 0;
+    
+    document.getElementById('myBalance').textContent = formatCurrency(myTotal);
+    document.getElementById('myContributionsCount').textContent = myContributions.length;
+    document.getElementById('myAverage').textContent = formatCurrency(myAvg);
+    document.getElementById('myParticipation').textContent = participation.toFixed(1) + '%';
 }
 
 function updateHistoryDisplay() {
@@ -492,13 +555,13 @@ function updateSubmetasDisplay() {
         ` : '';
         
         return `
-            <div class="submeta-item ${isCompleted ? 'completed' : ''}">
+            <div class="submeta-item ${isCompleted ? 'completed' : ''}" style="cursor: pointer;" onclick="showSubmetaDetailsModal('${submeta.id}')">
                 ${imageHtml}
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <strong>${submeta.name}</strong>
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-primary">${formatCurrency(submeta.amount)}</span>
-                        <button class="btn btn-sm btn-outline-danger delete-submeta-btn" data-id="${submeta.id}" title="Deletar submeta">
+                        <button class="btn btn-sm btn-outline-danger delete-submeta-btn" data-id="${submeta.id}" title="Deletar submeta" onclick="event.stopPropagation()">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
@@ -736,6 +799,18 @@ async function deleteSubmeta(submetaId) {
     );
 }
 
+// Delete Goal
+async function deleteGoal(goalId) {
+    showConfirmModal(
+        'Deletar Meta',
+        'Tem certeza que deseja deletar esta meta?',
+        async () => {
+            await set(ref(db, `goals/${goalId}`), null);
+            showSuccessModal('Meta deletada com sucesso!');
+        }
+    );
+}
+
 // Clear All History
 async function clearAllHistory() {
     showConfirmModal(
@@ -925,9 +1000,87 @@ document.addEventListener('DOMContentLoaded', () => {
             const submetaId = btn.dataset.id;
             deleteSubmeta(submetaId);
         }
+        
+        // Delete goal buttons
+        if (e.target.closest('.delete-goal-btn')) {
+            const btn = e.target.closest('.delete-goal-btn');
+            const goalId = btn.dataset.id;
+            deleteGoal(goalId);
+        }
     });
 });
 
+// Goal Details Modal
+function showGoalDetailsModal(goalId) {
+    const goal = goalsData[goalId];
+    if (!goal) {
+        showErrorModal('Meta não encontrada!');
+        return;
+    }
+    
+    const contributions = Object.values(contributionsData);
+    const total = contributions.reduce((sum, c) => sum + c.amount, 0);
+    const remaining = Math.max(0, goal.amount - total);
+    const percentage = goal.amount > 0 ? Math.min(100, (total / goal.amount) * 100) : 0;
+    
+    document.getElementById('goalDetailsTitle').textContent = goal.name;
+    document.getElementById('goalDetailsAmount').textContent = formatCurrency(goal.amount);
+    document.getElementById('goalDetailsSaved').textContent = formatCurrency(total);
+    document.getElementById('goalDetailsRemaining').textContent = formatCurrency(remaining);
+    document.getElementById('goalDetailsProgress').textContent = percentage.toFixed(1) + '%';
+    document.getElementById('goalDetailsProgressBar').style.width = percentage + '%';
+    document.getElementById('goalDetailsProgressText').textContent = percentage.toFixed(1) + '%';
+    
+    if (goal.image) {
+        document.getElementById('goalDetailsImage').innerHTML = `
+            <img src="${goal.image}" alt="${goal.name}">
+        `;
+    } else {
+        document.getElementById('goalDetailsImage').innerHTML = '';
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('goalDetailsModal'));
+    modal.show();
+}
+
+// Submeta Details Modal
+function showSubmetaDetailsModal(submetaId) {
+    const submeta = submetasData[submetaId];
+    if (!submeta) return;
+    
+    const contributions = Object.values(contributionsData);
+    const total = contributions.reduce((sum, c) => sum + c.amount, 0);
+    const remaining = Math.max(0, submeta.amount - total);
+    const percentage = Math.min(100, (total / submeta.amount) * 100);
+    const isCompleted = total >= submeta.amount;
+    
+    document.getElementById('submetaDetailsTitle').textContent = submeta.name;
+    document.getElementById('submetaDetailsAmount').textContent = formatCurrency(submeta.amount);
+    document.getElementById('submetaDetailsSaved').textContent = formatCurrency(total);
+    document.getElementById('submetaDetailsRemaining').textContent = formatCurrency(remaining);
+    document.getElementById('submetaDetailsReward').textContent = submeta.reward;
+    document.getElementById('submetaDetailsProgressBar').style.width = percentage + '%';
+    document.getElementById('submetaDetailsProgressText').textContent = percentage.toFixed(1) + '%';
+    
+    if (submeta.image) {
+        document.getElementById('submetaDetailsImage').innerHTML = `
+            <img src="${submeta.image}" alt="${submeta.name}">
+        `;
+    } else {
+        document.getElementById('submetaDetailsImage').innerHTML = '';
+    }
+    
+    if (isCompleted) {
+        document.getElementById('submetaCompletedBadge').classList.remove('d-none');
+        document.getElementById('submetaDetailsProgressBar').classList.add('bg-success');
+    } else {
+        document.getElementById('submetaCompletedBadge').classList.add('d-none');
+        document.getElementById('submetaDetailsProgressBar').classList.remove('bg-success');
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('submetaDetailsModal'));
+    modal.show();
+}
 
 // Modal Utilities
 function showConfirmModal(title, message, onConfirm, isDanger = false) {

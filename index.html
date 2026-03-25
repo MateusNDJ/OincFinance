@@ -17,7 +17,7 @@
 </head>
 <body>
     <!-- Login Screen -->
-    <div id="loginScreen" class="container-fluid">
+    <div id="loginScreen">
         <div class="login-box">
             <div class="text-center mb-4">
                 <div class="logo-icon">
@@ -137,16 +137,17 @@
                     </div>
 
                     <!-- Goal Section -->
-                    <div class="card mb-4 goal-card">
+                    <div class="card mb-4">
                         <div class="card-body">
-                            <h3 class="card-title text-center">
-                                <i class="bi bi-flag-fill me-2"></i>Meta Principal
-                            </h3>
-                            <div id="goalDisplay"></div>
-                            <div id="goalImageContainer"></div>
-                            <button class="btn btn-light btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#goalModal">
-                                <i class="bi bi-pencil-square me-1"></i>Editar Meta
-                            </button>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="card-title">
+                                    <i class="bi bi-flag-fill me-2"></i>Metas
+                                </h3>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#goalModal">
+                                    <i class="bi bi-plus-circle me-1"></i>Adicionar Meta
+                                </button>
+                            </div>
+                            <div id="goalsList"></div>
                         </div>
                     </div>
 
@@ -166,6 +167,30 @@
                             <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
                             <h6>Previsão</h6>
                             <div class="stat-value" id="forecast" style="font-size: 18px;">-</div>
+                        </div>
+                        <div class="stat-card stat-card-primary">
+                            <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+                            <h6>Contribuições</h6>
+                            <div class="stat-value" id="totalContributions">0</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Piggy Bank Progress -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="text-center mb-3">
+                                <i class="bi bi-graph-up-arrow me-2"></i>Progresso Geral
+                            </h5>
+                            <div class="piggy-bank-container text-center">
+                                <div class="piggy-bank" id="piggyBank">🐷</div>
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="progress mb-3" style="height: 35px;">
+                                <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                            <p class="text-center text-muted mb-0">
+                                <span id="progressMessage">Continue economizando!</span>
+                            </p>
                         </div>
                     </div>
                     
@@ -205,22 +230,6 @@
                         </div>
                     </div>
 
-                    <!-- Progress Section -->
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="text-center mb-3">
-                                <i class="bi bi-graph-up-arrow me-2"></i>Progresso
-                            </h5>
-                            <div class="piggy-bank-container text-center">
-                                <div class="piggy-bank" id="piggyBank">🐷</div>
-                                <div class="progress-fill" id="progressFill"></div>
-                            </div>
-                            <div class="progress mb-3" style="height: 35px;">
-                                <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%">0%</div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Contributions Comparison -->
                     <div class="card mb-4">
                         <div class="card-body">
@@ -245,12 +254,35 @@
 
                 <!-- Individual Tab -->
                 <div class="tab-pane fade" id="individual" role="tabpanel">
+                    <!-- My Stats Dashboard -->
+                    <div class="dashboard-grid mb-4">
+                        <div class="stat-card stat-card-success">
+                            <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+                            <h6>Meu Saldo</h6>
+                            <div class="stat-value" id="myBalance">R$ 0,00</div>
+                        </div>
+                        <div class="stat-card stat-card-primary">
+                            <div class="stat-icon"><i class="bi bi-graph-up"></i></div>
+                            <h6>Minhas Contribuições</h6>
+                            <div class="stat-value" id="myContributionsCount">0</div>
+                        </div>
+                        <div class="stat-card stat-card-warning">
+                            <div class="stat-icon"><i class="bi bi-calculator"></i></div>
+                            <h6>Média</h6>
+                            <div class="stat-value" id="myAverage">R$ 0,00</div>
+                        </div>
+                        <div class="stat-card stat-card-info">
+                            <div class="stat-icon"><i class="bi bi-percent"></i></div>
+                            <h6>Participação</h6>
+                            <div class="stat-value" id="myParticipation">0%</div>
+                        </div>
+                    </div>
+                    
                     <div class="card mb-4">
                         <div class="card-body">
-                            <h4><i class="bi bi-cash-stack me-2"></i>Meu Saldo</h4>
-                            <p class="fs-3 text-primary fw-bold" id="myBalance">R$ 0,00</p>
+                            <h4><i class="bi bi-plus-circle me-2"></i>Adicionar Contribuição</h4>
                             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#contributionModal">
-                                <i class="bi bi-plus-circle me-2"></i>Adicionar Contribuição
+                                <i class="bi bi-cash-coin me-2"></i>Nova Contribuição
                             </button>
                         </div>
                     </div>
@@ -469,6 +501,133 @@
                             <i class="bi bi-check-circle me-2"></i>Adicionar
                         </button>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goal Details Modal -->
+    <div class="modal fade" id="goalDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-flag-fill me-2"></i><span id="goalDetailsTitle">Meta Principal</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="goalDetailsImage" class="text-center mb-4"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <i class="bi bi-bullseye text-primary"></i>
+                                <div>
+                                    <small class="text-muted">Valor da Meta</small>
+                                    <h4 id="goalDetailsAmount">R$ 0,00</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <i class="bi bi-wallet2 text-success"></i>
+                                <div>
+                                    <small class="text-muted">Já Acumulado</small>
+                                    <h4 id="goalDetailsSaved">R$ 0,00</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <i class="bi bi-cash-stack text-warning"></i>
+                                <div>
+                                    <small class="text-muted">Ainda Falta</small>
+                                    <h4 id="goalDetailsRemaining">R$ 0,00</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <i class="bi bi-percent text-info"></i>
+                                <div>
+                                    <small class="text-muted">Progresso</small>
+                                    <h4 id="goalDetailsProgress">0%</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="progress" style="height: 30px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" id="goalDetailsProgressBar" role="progressbar" style="width: 0%">
+                                <span id="goalDetailsProgressText">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submeta Details Modal -->
+    <div class="modal fade" id="submetaDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-trophy me-2"></i><span id="submetaDetailsTitle">Submeta</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="submetaDetailsImage" class="text-center mb-4"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <i class="bi bi-bullseye text-primary"></i>
+                                <div>
+                                    <small class="text-muted">Valor da Submeta</small>
+                                    <h4 id="submetaDetailsAmount">R$ 0,00</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <i class="bi bi-wallet2 text-success"></i>
+                                <div>
+                                    <small class="text-muted">Já Acumulado</small>
+                                    <h4 id="submetaDetailsSaved">R$ 0,00</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <i class="bi bi-cash-stack text-warning"></i>
+                                <div>
+                                    <small class="text-muted">Ainda Falta</small>
+                                    <h4 id="submetaDetailsRemaining">R$ 0,00</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <i class="bi bi-gift text-danger"></i>
+                                <div>
+                                    <small class="text-muted">Recompensa</small>
+                                    <h4 id="submetaDetailsReward" style="font-size: 16px;">-</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="progress" style="height: 30px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" id="submetaDetailsProgressBar" role="progressbar" style="width: 0%">
+                                <span id="submetaDetailsProgressText">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="submetaCompletedBadge" class="alert alert-success mt-3 d-none">
+                        <i class="bi bi-check-circle-fill me-2"></i>Meta Concluída! 🎉
+                    </div>
                 </div>
             </div>
         </div>
