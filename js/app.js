@@ -88,6 +88,8 @@ async function handleLogin(e) {
             errorMessage = 'Muitas tentativas. Aguarde alguns minutos.';
         } else if (error.code === 'auth/network-request-failed') {
             errorMessage = 'Erro de conexão. Verifique sua internet.';
+        } else if (error.code.includes('auth/requests-to-this-api') || error.code.includes('blocked')) {
+            errorMessage = '⚠️ API bloqueada! Configure as restrições da API Key no Google Cloud Console para permitir "Identity Toolkit API".';
         }
         
         showErrorModal(errorMessage);
