@@ -243,6 +243,7 @@ async function handleContributionSubmit(e) {
 
 // Display Updates
 function updateAllDisplays() {
+    console.log('Updating all displays...', { contributionsData, goalData });
     updateProgressDisplay();
     updateHistoryDisplay();
     updateChart();
