@@ -103,11 +103,15 @@ async function handleLogout() {
 function showLoginScreen() {
     document.getElementById('loginScreen').classList.remove('d-none');
     document.getElementById('mainApp').classList.add('d-none');
+    document.body.classList.add('login-active');
+    document.body.classList.remove('app-active');
 }
 
 function showMainApp() {
     document.getElementById('loginScreen').classList.add('d-none');
     document.getElementById('mainApp').classList.remove('d-none');
+    document.body.classList.remove('login-active');
+    document.body.classList.add('app-active');
     loadUserProfile();
 }
 

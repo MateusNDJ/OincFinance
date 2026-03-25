@@ -62,10 +62,18 @@ body {
     margin: 0 !important;
     padding: 0 !important;
     width: 100%;
-    height: auto;
     min-height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
+}
+
+body.login-active {
+    overflow: hidden !important;
+    height: 100vh;
+}
+
+body.app-active {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
 }
 
 /* Hide scrollbar but keep functionality */
