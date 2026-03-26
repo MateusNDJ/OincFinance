@@ -44,7 +44,10 @@ html {
     padding: 0 !important;
     width: 100%;
     height: 100%;
-    overflow: hidden;
+}
+
+html.app-active {
+    overflow: visible !important;
 }
 
 * {
@@ -76,15 +79,33 @@ body.app-active {
     height: auto !important;
 }
 
-/* Hide scrollbar but keep functionality */
-::-webkit-scrollbar {
+/* Hide scrollbar only on login */
+body.login-active::-webkit-scrollbar {
     width: 0px;
     background: transparent;
 }
 
-* {
+body.login-active {
     scrollbar-width: none;
     -ms-overflow-style: none;
+}
+
+/* Show scrollbar on app */
+body.app-active::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.app-active::-webkit-scrollbar-track {
+    background: var(--light-bg);
+}
+
+body.app-active::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+body.app-active::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
 }
 
 h1, h2, h3, h4, h5, h6 {

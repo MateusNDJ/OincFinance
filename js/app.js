@@ -105,6 +105,7 @@ function showLoginScreen() {
     document.getElementById('mainApp').classList.add('d-none');
     document.body.classList.add('login-active');
     document.body.classList.remove('app-active');
+    document.documentElement.classList.remove('app-active');
 }
 
 function showMainApp() {
@@ -112,6 +113,7 @@ function showMainApp() {
     document.getElementById('mainApp').classList.remove('d-none');
     document.body.classList.remove('login-active');
     document.body.classList.add('app-active');
+    document.documentElement.classList.add('app-active');
     loadUserProfile();
 }
 
@@ -823,6 +825,32 @@ async function clearAllHistory() {
         async () => {
             await set(ref(db, 'contributions'), null);
             showSuccessModal('Histórico limpo com sucesso!');
+        },
+        true // danger mode
+    );
+}
+
+// Clear All Data (Reset App)
+async function clearAllData() {
+    showConfirmModal(
+        'Resetar Aplicação',
+        '⚠️ PERIGO: Isso vai deletar TUDO (metas, contribuições, submetas, recompensas)! Esta ação não pode ser desfeita.',
+        async () => {
+            // Clear new structure
+            await set(ref(db, 'goals'), null);
+            await set(ref(db, 'contributions'), null);
+            await set(ref(db, 'submetas'), null);
+            await set(ref(db, 'rewards'), null);
+            
+            // Clear old structure (if exists)
+            await set(ref(db, 'goal'), null);
+            
+            showSuccessModal('Aplicação resetada com sucesso! Recarregue a página.');
+            
+            // Reload after 2 seconds
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
         },
         true // danger mode
     );
