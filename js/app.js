@@ -300,10 +300,22 @@ function updateProgressDisplay() {
     
     document.getElementById('totalSaved').textContent = formatCurrency(total);
     document.getElementById('remaining').textContent = formatCurrency(remaining);
-    document.getElementById('totalContributions').textContent = contributions.length;
-    document.getElementById('progressBar').style.width = percentage + '%';
-    document.getElementById('progressBar').textContent = percentage.toFixed(1) + '%';
-    document.getElementById('progressFill').style.height = percentage + '%';
+    
+    const totalContributionsEl = document.getElementById('totalContributions');
+    if (totalContributionsEl) {
+        totalContributionsEl.textContent = contributions.length;
+    }
+    
+    const progressBarEl = document.getElementById('progressBar');
+    if (progressBarEl) {
+        progressBarEl.style.width = percentage + '%';
+        progressBarEl.textContent = percentage.toFixed(1) + '%';
+    }
+    
+    const progressFillEl = document.getElementById('progressFill');
+    if (progressFillEl) {
+        progressFillEl.style.height = percentage + '%';
+    }
     
     // Progress message
     let message = 'Continue economizando!';
@@ -316,16 +328,28 @@ function updateProgressDisplay() {
     } else if (percentage >= 25) {
         message = '🌟 Bom progresso! Não desista!';
     }
-    document.getElementById('progressMessage').textContent = message;
+    
+    const progressMessageEl = document.getElementById('progressMessage');
+    if (progressMessageEl) {
+        progressMessageEl.textContent = message;
+    }
     
     // Celebration when goal is reached
     const piggyBank = document.getElementById('piggyBank');
-    if (percentage >= 100 && totalGoalAmount > 0) {
-        piggyBank.textContent = '🎉';
-        document.querySelector('.piggy-bank-container').classList.add('celebration-mode');
-    } else {
-        piggyBank.textContent = '🐷';
-        document.querySelector('.piggy-bank-container')?.classList.remove('celebration-mode');
+    if (piggyBank) {
+        if (percentage >= 100 && totalGoalAmount > 0) {
+            piggyBank.textContent = '🎉';
+            const piggyContainer = document.querySelector('.piggy-bank-container');
+            if (piggyContainer) {
+                piggyContainer.classList.add('celebration-mode');
+            }
+        } else {
+            piggyBank.textContent = '🐷';
+            const piggyContainer = document.querySelector('.piggy-bank-container');
+            if (piggyContainer) {
+                piggyContainer.classList.remove('celebration-mode');
+            }
+        }
     }
     
     updateForecast(contributions, total, totalGoalAmount);
@@ -1070,7 +1094,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Delete contribution buttons (delegated event)
     document.addEventListener('click', (e) => {
+        console.log('Click detected:', e.target);
+        
         if (e.target.closest('.delete-contribution-btn')) {
+            console.log('Delete contribution clicked');
             const btn = e.target.closest('.delete-contribution-btn');
             const contributionId = btn.dataset.id;
             deleteContribution(contributionId);
@@ -1078,15 +1105,19 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Delete submeta buttons
         if (e.target.closest('.delete-submeta-btn')) {
+            console.log('Delete submeta clicked');
             const btn = e.target.closest('.delete-submeta-btn');
             const submetaId = btn.dataset.id;
+            console.log('Submeta ID:', submetaId);
             deleteSubmeta(submetaId);
         }
         
         // Delete goal buttons
         if (e.target.closest('.delete-goal-btn')) {
+            console.log('Delete goal clicked');
             const btn = e.target.closest('.delete-goal-btn');
             const goalId = btn.dataset.id;
+            console.log('Goal ID:', goalId);
             deleteGoal(goalId);
         }
     });
