@@ -331,6 +331,51 @@ function updateProgressDisplay() {
     updateForecast(contributions, total, totalGoalAmount);
     updateMyBalance();
     updateIndividualDashboard();
+    updateContributorsDisplay();
+}
+
+function updateContributorsDisplay() {
+    const container = document.getElementById('contributorsDisplay');
+    if (!container) return;
+    
+    const contributions = Object.values(contributionsData);
+    
+    // Group by user
+    const userStats = {};
+    contributions.forEach(c => {
+        if (!userStats[c.userId]) {
+            userStats[c.userId] = {
+                email: c.userEmail,
+                total: 0,
+                count: 0
+            };
+        }
+        userStats[c.userId].total += c.amount;
+        userStats[c.userId].count++;
+    });
+    
+    if (Object.keys(userStats).length === 0) {
+        container.innerHTML = '<p class="text-muted">Nenhuma contribuição ainda</p>';
+        return;
+    }
+    
+    container.innerHTML = Object.entries(userStats).map(([userId, stats]) => {
+        const userName = stats.email.split('@')[0];
+        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=6366f1&color=fff&size=80&bold=true`;
+        const avg = stats.total / stats.count;
+        
+        return `
+            <div class="contributor-card">
+                <img src="${avatar}" alt="${userName}" class="contributor-avatar">
+                <div class="contributor-name">${userName}</div>
+                <div class="contributor-stats">
+                    <span class="contributor-stat">${stats.count} contribuições</span>
+                    <span class="contributor-stat">Média: ${formatCurrency(avg)}</span>
+                </div>
+                <div class="contributor-amount">${formatCurrency(stats.total)}</div>
+            </div>
+        `;
+    }).join('');
 }
 
 function updateForecast(contributions, total, goalAmount) {
