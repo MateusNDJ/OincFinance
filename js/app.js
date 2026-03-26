@@ -281,7 +281,7 @@ async function handleContributionSubmit(e) {
 
 // Display Updates
 function updateAllDisplays() {
-    console.log('Updating all displays...', { contributionsData, goalData });
+    console.log('Updating all displays...', { contributionsData, goalsData });
     updateProgressDisplay();
     updateHistoryDisplay();
     updateChart();
@@ -593,9 +593,13 @@ async function unlockReward(submeta) {
         const newReward = {
             submetaName: submeta.name,
             reward: submeta.reward,
-            image: submeta.image,
             unlockedAt: Date.now()
         };
+        
+        // Only add image if it exists
+        if (submeta.image) {
+            newReward.image = submeta.image;
+        }
         
         await set(rewardRef, [...rewards, newReward]);
         
@@ -772,9 +776,10 @@ function updateAdvancedMetrics() {
     }
     
     // Saving speed
-    const goalAmount = goalData?.amount || 0;
-    if (goalAmount > 0) {
-        const percentage = (total / goalAmount) * 100;
+    const goals = Object.values(goalsData);
+    const totalGoalAmount = goals.reduce((sum, g) => sum + g.amount, 0);
+    if (totalGoalAmount > 0) {
+        const percentage = (total / totalGoalAmount) * 100;
         document.getElementById('savingSpeed').textContent = `${percentage.toFixed(1)}% da meta`;
     } else {
         document.getElementById('savingSpeed').textContent = '-';
